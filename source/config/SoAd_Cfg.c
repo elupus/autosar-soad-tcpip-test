@@ -66,12 +66,13 @@ const TcpIp_SockAddrInetType socket_remote_any_v4 = {
 
 const TcpIp_SockAddrInetType socket_remote_loopback_v4 = {
     .domain  = TCPIP_AF_INET,
-    .addr[0] = 0x74000001,
+    .addr[0] = 0x0100007fu,
     .port    = 8000,
 };
 
 const SoAd_SoGrpConfigType           socket_group_1 = {
     .localport = 8000,
+    .domain    = TCPIP_AF_INET,
     .protocol  = TCPIP_IPPROTO_TCP,
     .automatic = TRUE,
     .initiate  = FALSE,
@@ -79,7 +80,8 @@ const SoAd_SoGrpConfigType           socket_group_1 = {
 };
 
 const SoAd_SoGrpConfigType           socket_group_2 = {
-    .localport = TCPIP_AF_INET,
+    .localport = TCPIP_PORT_ANY,
+    .domain    = TCPIP_AF_INET,
     .protocol  = TCPIP_IPPROTO_TCP,
     .automatic = TRUE,
     .initiate  = TRUE,
@@ -109,7 +111,7 @@ const SoAd_SoConConfigType           socket_group_1_conn_1 = {
 };
 
 const SoAd_SoConConfigType           socket_group_1_conn_2 = {
-    .group  = SOCKET_GRP1,
+    .group  = SOCKET_GRP2,
     .remote = (const TcpIp_SockAddrType*)&socket_remote_loopback_v4,
     .socket_route_id  = SOCKET_ROUTE2,
 };

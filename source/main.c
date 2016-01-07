@@ -55,6 +55,7 @@ int suite_clean(void)
 
 void suite_tick(void)
 {
+    usleep(10000);
     TcpIp_MainFunction();
     SoAd_MainFunction();
 }
@@ -62,7 +63,18 @@ void suite_tick(void)
 void suite_startup(void)
 {
     suite_tick();
+    suite_tick();
+    suite_tick();
+    suite_tick();
+}
 
+void suite_transmit_0(void)
+{
+    PduInfoType info;
+    uint8       buf[100];
+    info.SduDataPtr = buf;
+    info.SduLength  = sizeof(buf);
+    CU_ASSERT_EQUAL(SoAd_IfTransmit(0, &info), E_OK);
 }
 
 int main(void)
@@ -76,6 +88,8 @@ int main(void)
     /* add a suite to the registry */
     suite = CU_add_suite("Suite_Generic V4", suite_init, suite_clean);
 
+    CU_add_test(suite, "startup"   , suite_startup);
+    CU_add_test(suite, "transmit_0", suite_transmit_0);
 
     /* Run all tests using the CUnit Basic interface */
     CU_basic_set_mode(CU_BRM_VERBOSE);
