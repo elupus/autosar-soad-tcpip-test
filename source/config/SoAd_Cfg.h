@@ -20,16 +20,16 @@
 
 #include "Std_Types.h"
 
-#define SOAD_CFG_SOCKETROUTE_COUNT     3u
+#define SOAD_CFG_SOCKETROUTE_COUNT     2u
 #define SOAD_CFG_PDUROUTE_COUNT        1u
-#define SOAD_CFG_CONNECTIONGROUP_COUNT 3u
-#define SOAD_CFG_CONNECTION_COUNT      5u
+#define SOAD_CFG_CONNECTIONGROUP_COUNT 2u
+#define SOAD_CFG_CONNECTION_COUNT      2u
 
 #define SOCKET_GRP1      0
 #define SOCKET_GRP2      1
 
 #define SOCKET_GRP1_CON1 0
-#define SOCKET_GRP2_CON1 2
+#define SOCKET_GRP2_CON1 1
 
 #define SOCKET_ROUTE1    0
 #define SOCKET_ROUTE2    1

@@ -53,6 +53,18 @@ int suite_clean(void)
 	return 0;
 }
 
+void suite_tick(void)
+{
+    TcpIp_MainFunction();
+    SoAd_MainFunction();
+}
+
+void suite_startup(void)
+{
+    suite_tick();
+
+}
+
 int main(void)
 {
     CU_pSuite suite = NULL;
