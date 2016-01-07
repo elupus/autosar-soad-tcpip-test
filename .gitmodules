@@ -1,0 +1,6 @@
+[submodule "externals/soad"]
+	path = externals/soad
+	url = ../autosar-soad
+[submodule "externals/tcpip"]
+	path = externals/tcpip
+	url = ../autosar-tcpip-posix/
