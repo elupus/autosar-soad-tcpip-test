@@ -105,6 +105,23 @@ void suite_transmit_x(PduIdType tx, PduIdType rx)
     CU_ASSERT_EQUAL(suite_state.pdu[tx].rx_len, sute_before.pdu[tx].rx_len);
 }
 
+void suite_transmit_pieces_x(PduIdType tx, PduIdType rx)
+{
+    PduInfoType info;
+    uint8       buf[100];
+    struct suite_state sute_before = suite_state;
+    info.SduDataPtr = buf;
+    info.SduLength  = 20;
+    CU_ASSERT_EQUAL_FATAL(SoAd_IfTransmit(tx, &info), E_OK);
+
+    info.SduLength  = 80;
+    CU_ASSERT_EQUAL_FATAL(SoAd_IfTransmit(tx, &info), E_OK);
+
+    suite_tick_count(10u);
+
+    CU_ASSERT_EQUAL(suite_state.pdu[rx].rx_len, sute_before.pdu[rx].rx_len + sizeof(buf));
+    CU_ASSERT_EQUAL(suite_state.pdu[tx].rx_len, sute_before.pdu[tx].rx_len);
+}
 
 void suite_transmit_0(void)
 {
@@ -116,6 +133,16 @@ void suite_transmit_1(void)
     suite_transmit_x(1, 0);
 }
 
+void suite_transmit_pieces_0(void)
+{
+    suite_transmit_pieces_x(0, 1);
+}
+
+void suite_transmit_pieces_1(void)
+{
+    suite_transmit_pieces_x(1, 0);
+}
+
 int main(void)
 {
     CU_pSuite suite = NULL;
@@ -125,11 +152,13 @@ int main(void)
       return CU_get_error();
 
     /* add a suite to the registry */
-    suite = CU_add_suite("Suite_Generic V4", suite_init, suite_clean);
+    suite = CU_add_suite("Suite_Generic", suite_init, suite_clean);
 
     CU_add_test(suite, "startup"   , suite_startup);
-    CU_add_test(suite, "transmit_1", suite_transmit_1);
     CU_add_test(suite, "transmit_0", suite_transmit_0);
+    CU_add_test(suite, "transmit_1", suite_transmit_1);
+    CU_add_test(suite, "transmit_pieces_0", suite_transmit_pieces_0);
+    CU_add_test(suite, "transmit_pieces_1", suite_transmit_pieces_1);
 
     /* Run all tests using the CUnit Basic interface */
     CU_basic_set_mode(CU_BRM_VERBOSE);
