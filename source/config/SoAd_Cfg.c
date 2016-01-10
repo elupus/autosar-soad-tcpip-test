@@ -116,7 +116,19 @@ const SoAd_SoConConfigType           socket_group_1_conn_2 = {
     .socket_route_id  = SOCKET_ROUTE2,
 };
 
-const SoAd_PduRouteType              pdu_route_1;
+const SoAd_PduRouteType              pdu_route_1 = {
+        .destination = {
+                .header_id  = SOAD_PDUHEADERID_INVALID,
+                .connection = SOCKET_GRP1_CON1,
+        },
+};
+
+const SoAd_PduRouteType              pdu_route_2 = {
+        .destination = {
+                .header_id  = SOAD_PDUHEADERID_INVALID,
+                .connection = SOCKET_GRP2_CON1,
+        },
+};
 
 const SoAd_ConfigType SoAd_DefaultConfig = {
     .groups = {
@@ -136,5 +148,6 @@ const SoAd_ConfigType SoAd_DefaultConfig = {
 
     .pdu_routes        = {
         &pdu_route_1,
+        &pdu_route_2,
     },
 };
