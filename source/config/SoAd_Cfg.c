@@ -72,6 +72,7 @@ const TcpIp_SockAddrInetType socket_remote_loopback_v4 = {
 
 const SoAd_SoGrpConfigType           socket_group_1 = {
     .localport = 8000,
+    .localaddr = TCPIP_LOCALADDRID_ANY,
     .domain    = TCPIP_AF_INET,
     .protocol  = TCPIP_IPPROTO_TCP,
     .automatic = TRUE,
@@ -81,6 +82,7 @@ const SoAd_SoGrpConfigType           socket_group_1 = {
 
 const SoAd_SoGrpConfigType           socket_group_2 = {
     .localport = TCPIP_PORT_ANY,
+    .localaddr = TCPIP_LOCALADDRID_ANY,
     .domain    = TCPIP_AF_INET,
     .protocol  = TCPIP_IPPROTO_TCP,
     .automatic = TRUE,
