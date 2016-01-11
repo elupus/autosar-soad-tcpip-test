@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 project (autosar-soad-tcpip)
+enable_testing()
 
 include_directories (externals/soad/source
                      externals/tcpip/source
@@ -17,3 +18,5 @@ add_executable (main ${SOURCES})
 
 set_target_properties (main PROPERTIES LINK_FLAGS -Wl,-lcunit)
 
+add_test(NAME    loopback
+         COMMAND main)
