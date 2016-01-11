@@ -14,3 +14,4 @@ list (APPEND SOURCES
 )
 
 add_subdirectory(source/loopback)
+add_subdirectory(source/echo)
