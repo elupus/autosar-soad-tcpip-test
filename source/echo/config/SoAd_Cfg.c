@@ -15,47 +15,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "SoAd_Cfg.h"
 #include "SoAd.h"
 #include "TcpIp.h"
+#include "Catb.h"
 
 extern void PduR_SoAdIfRxIndication(PduIdType id, const PduInfoType* info);
 
-static BufReq_ReturnType PduR_SoAdIfStartOfReception(
-        PduIdType               id,
-        const PduInfoType*      info,
-        PduLengthType           len,
-        PduLengthType*          buf_len
-    )
-{
-    *buf_len = (PduLengthType)0xffffu;
-    return BUFREQ_OK;
-}
-
-static BufReq_ReturnType PduR_SoAdIfCopyRxData(
-        PduIdType               id,
-        const PduInfoType*      info,
-        PduLengthType*          buf_len
-    )
-{
-    if (info->SduLength) {
-        PduR_SoAdIfRxIndication(id, info);
-    }
-    *buf_len = (PduLengthType)0xffffu;
-    return BUFREQ_OK;
-}
-
-static void PduR_SoAdTpRxIndication_If(
-        PduIdType               id,
-        Std_ReturnType          result
-    )
-{
-}
-
-const SoAd_TpRxType suite_if = {
-        .rx_indication      = PduR_SoAdTpRxIndication_If,
-        .copy_rx_data       = PduR_SoAdIfCopyRxData,
-        .start_of_reception = PduR_SoAdIfStartOfReception,
+const SoAd_TpRxType suite_tp = {
+        .rx_indication      = Catb_RxIndication,
+        .copy_rx_data       = Catb_CopyRxData,
+        .start_of_reception = Catb_StartOfReception,
 };
 
 const TcpIp_SockAddrInetType socket_remote_any_v4 = {
@@ -77,7 +46,7 @@ const SoAd_SoGrpConfigType           socket_group_1 = {
 const SoAd_SocketRouteType           socket_route_1 = {
         .header_id = SOAD_PDUHEADERID_INVALID,
         .destination = {
-                .upper      = &suite_if,
+                .upper      = &suite_tp,
                 .pdu        = 0u
         }
 };

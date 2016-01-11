@@ -9,6 +9,7 @@ include_directories (
 list (APPEND SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/config/SoAd_Cfg.c
 	${CMAKE_CURRENT_SOURCE_DIR}/config/TcpIp_Cfg.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Catb.c
 	${CMAKE_CURRENT_SOURCE_DIR}/main.c
 )
 
