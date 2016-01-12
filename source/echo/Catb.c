@@ -18,21 +18,24 @@ typedef struct {
 
 Catb_RxStatusType Catb_RxStatus[CATB_RXPDU_COUNT];
 
-uint8 Catb_HexTo8u(uint8 h, uint8 l)
-{
-    return ((h - (uint8)'0') << 4u)
-         | ((l - (uint8)'0'));
-}
+#define CATB_NIBBLE_ERROR 0xffu
+#define CATB_NIBBLE_DELIM 0xfeu
 
-boolean Catb_IsDelimiter(uint8 data)
+uint8 Catb_Nibble(uint8 c)
 {
-    return ((data == '\r') || (data == '\n')) ? TRUE : FALSE;
-}
-
-boolean Catb_IsNumeric(uint8 data)
-{
-    return ((data >= (uint8)'0')
-        &&  (data <= (uint8)'9')) ? TRUE : FALSE;
+    if ((c >= (uint8)'0') && (c <= (uint8)'9')) {
+        return c - (uint8)'0';
+    }
+    if ((c >= (uint8)'a') && (c <= (uint8)'f')) {
+        return c - (uint8)'a' + 10u;
+    }
+    if ((c >= (uint8)'A') && (c <= (uint8)'F')) {
+        return c - (uint8)'A' + 10u;
+    }
+    if ((c == (uint8)'\n') || (c == (uint8)'\r')) {
+        return CATB_NIBBLE_DELIM;
+    }
+    return CATB_NIBBLE_ERROR;
 }
 
 #define CATB_SKIPBUFFER_LENGTH 0x1000u
@@ -79,11 +82,14 @@ BufReq_ReturnType Catb_CopyRxData(
     info2.SduLength  = 1u;
 
     for (idx = 0u; idx < info->SduLength; ++idx) {
-        const uint8 data = info->SduDataPtr[idx];
+        const uint8 data = Catb_Nibble(info->SduDataPtr[idx]);
         switch(status->state) {
             case CATB_IDLE:
-                if (Catb_IsNumeric(data)) {
-
+                if (data == CATB_NIBBLE_ERROR) {
+                    status->state = CATB_SKIP;
+                } else if (data == CATB_NIBBLE_DELIM) {
+                    status->state = CATB_IDLE;
+                } else {
                     res = CATB_UP_STARTOFRECEPTION(id, &info2, 0, &status->space);
                     if (res == BUFREQ_OK) {
                         status->last  = data;
@@ -92,30 +98,32 @@ BufReq_ReturnType Catb_CopyRxData(
                         status->space = CATB_SKIPBUFFER_LENGTH;
                         status->state = CATB_SKIP;
                     }
-
-                } else if (Catb_IsDelimiter(data)) {
-                    status->state = CATB_IDLE;
-                } else {
-                    status->state = CATB_SKIP;
                 }
+
                 break;
 
             case CATB_STD:
-                if (Catb_IsNumeric(data)) {
-                    status->last  = data;
-                    status->state = CATB_REM;
-                } else if (Catb_IsDelimiter(data) == TRUE) {
+                if (data == CATB_NIBBLE_ERROR) {
+                    CATB_UP_RXINDICATION(id, E_NOT_OK);
+                    status->state = CATB_SKIP;
+                } else if (data == CATB_NIBBLE_DELIM) {
                     CATB_UP_RXINDICATION(id, E_OK);
                     status->state = CATB_IDLE;
                 } else {
-                    CATB_UP_RXINDICATION(id, E_NOT_OK);
-                    status->state = CATB_SKIP;
+                    status->last  = data;
+                    status->state = CATB_REM;
                 }
                 break;
 
             case CATB_REM:
-                if (Catb_IsNumeric(data)) {
-                    buf = Catb_HexTo8u(status->last, data);
+                if (data == CATB_NIBBLE_ERROR) {
+                    CATB_UP_RXINDICATION(id, E_NOT_OK);
+                    status->state = CATB_SKIP;
+                } else if (data == CATB_NIBBLE_DELIM) {
+                    CATB_UP_RXINDICATION(id, E_NOT_OK);
+                    status->state = CATB_IDLE;
+                } else {
+                    buf = (status->last << 4u) | data;
                     res = CATB_UP_COPYRXDATA(id, &info2, &status->space);
                     if (res == BUFREQ_OK) {
                         status->state = CATB_STD;
@@ -124,17 +132,11 @@ BufReq_ReturnType Catb_CopyRxData(
                         status->space = CATB_SKIPBUFFER_LENGTH;
                         status->state = CATB_SKIP;
                     }
-                } else if (Catb_IsDelimiter(data)) {
-                    CATB_UP_RXINDICATION(id, E_NOT_OK);
-                    status->state = CATB_IDLE;
-                } else {
-                    CATB_UP_RXINDICATION(id, E_NOT_OK);
-                    status->state = CATB_SKIP;
                 }
                 break;
 
             case CATB_SKIP:
-                if (data == '\n') {
+                if (data == CATB_NIBBLE_DELIM) {
                     status->state = CATB_IDLE;
                 }
                 break;

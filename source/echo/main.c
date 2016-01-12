@@ -61,8 +61,7 @@ BufReq_ReturnType Main_CatbCopyRxData(
 {
     fprintf(stderr, "copy: %u, %u\n", id, info->SduLength);
     for(int i = 0; i < info->SduLength; ++i) {
-        fputc('0' + ((info->SduDataPtr[i] >> 4u) & 0xFu), stdout);
-        fputc('0' + ((info->SduDataPtr[i] >> 0u) & 0xFu), stdout);
+        fprintf(stdout, "%02x", info->SduDataPtr[i]);
     }
     *buf_len = 0x1000u;
     return BUFREQ_OK;
