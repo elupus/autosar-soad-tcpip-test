@@ -76,6 +76,24 @@ void Main_CatbRxIndication(
     fflush(stdout);
 }
 
+BufReq_ReturnType Main_CatbCopyTxData(
+        PduIdType               id,
+        const PduInfoType*      info,
+        RetryInfoType*          retry,
+        PduLengthType*          available
+    )
+{
+    return BUFREQ_E_NOT_OK;
+}
+
+void Main_CatbTxConfirmation(
+        PduIdType               id,
+        Std_ReturnType          result
+    )
+{
+
+}
+
 int main(void)
 {
     TcpIp_Init(&TcpIp_DefaultConfig);
