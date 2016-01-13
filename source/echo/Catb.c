@@ -21,7 +21,7 @@ Catb_RxStatusType Catb_RxStatus[CATB_RXPDU_COUNT];
 #define CATB_NIBBLE_ERROR 0xffu
 #define CATB_NIBBLE_DELIM 0xfeu
 
-uint8 Catb_Nibble(uint8 c)
+static uint8 Catb_Nibble(uint8 c)
 {
     if ((c >= (uint8)'0') && (c <= (uint8)'9')) {
         return c - (uint8)'0';
