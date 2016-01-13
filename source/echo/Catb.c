@@ -232,7 +232,7 @@ BufReq_ReturnType Catb_CopyTxData(
         }
         info2.SduDataPtr = &info->SduDataPtr[info2.SduLength];
 
-        res = CATB_UP_COPYTXDATA(id, info2, retry, &rem);
+        res = CATB_UP_COPYTXDATA(id, &info2, retry, &rem);
         if (res == BUFREQ_OK) {
             PduLengthType      idx;
 
