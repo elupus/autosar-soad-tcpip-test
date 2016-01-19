@@ -27,6 +27,11 @@ const SoAd_TpRxType suite_tp = {
         .start_of_reception = Catb_StartOfReception,
 };
 
+const SoAd_TpTxType suite_tptx = {
+        .copy_tx_data       = Catb_CopyTxData,
+        .tx_confirmation    = Catb_TxConfirmation,
+};
+
 const TcpIp_SockAddrInetType socket_remote_any_v4 = {
     .domain  = TCPIP_AF_INET,
     .addr[0] = TCPIP_IPADDR_ANY,
@@ -64,6 +69,8 @@ const SoAd_SoConConfigType           socket_group_1_conn_2 = {
 };
 
 const SoAd_PduRouteType              pdu_route_1 = {
+        .pdu_id = 0u,
+        .upper  = &suite_tptx,
         .destination = {
                 .header_id  = SOAD_PDUHEADERID_INVALID,
                 .connection = SOCKET_GRP1_CON1,
