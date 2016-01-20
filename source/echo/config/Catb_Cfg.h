@@ -2,6 +2,8 @@
 #ifndef CATB_CFG_H_
 #define CATB_CFG_H_
 
+#include "SoAd.h"
+
 extern BufReq_ReturnType Main_CatbStartOfReception(
     PduIdType               id,
     const PduInfoType*      info,
@@ -43,6 +45,6 @@ void Main_CatbTxConfirmation(
 #define CATB_UP_COPYTXDATA(id, info, retry, available)   Main_CatbCopyTxData(id, info, retry, available)
 #define CATB_UP_TXCONFIRMATION(id, result)               Main_CatbTxConfirmation(id, result)
 
-#define CATB_LO_TRANSMIT(id, info)                         (E_NOT_OK)
+#define CATB_LO_TRANSMIT(id, info)                       SoAd_TpTransmit(id, info)
 
 #endif /* CATB_CFG_H_ */

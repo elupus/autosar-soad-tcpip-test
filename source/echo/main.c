@@ -25,9 +25,16 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 
 extern TcpIp_ConfigType TcpIp_DefaultConfig;
 extern SoAd_ConfigType  SoAd_DefaultConfig;
+
+uint8  Main_Buffer[1000u];
+uint16 Main_Len;
+uint16 Main_Tx;
+uint16 Main_Rx;
+
 
 Std_ReturnType Det_ReportError(
         uint16 ModuleId,
@@ -49,7 +56,10 @@ BufReq_ReturnType Main_CatbStartOfReception(
 )
 {
     fprintf(stderr, "start: %u\n", id);
-    *buf_len = 0x1000u;
+    *buf_len = sizeof(Main_Buffer);
+    Main_Tx  = 0u;
+    Main_Rx  = 0u;
+    Main_Len = info->SduLength;
     return BUFREQ_OK;
 }
 
@@ -63,7 +73,12 @@ BufReq_ReturnType Main_CatbCopyRxData(
     for(int i = 0; i < info->SduLength; ++i) {
         fprintf(stdout, "%02x", info->SduDataPtr[i]);
     }
-    *buf_len = 0x1000u;
+    memcpy(&Main_Buffer[Main_Rx], info->SduDataPtr, info->SduLength);
+    Main_Rx += info->SduLength;
+    if (Main_Len < Main_Rx) {
+        Main_Len = Main_Rx;
+    }
+    *buf_len = sizeof(Main_Buffer) - Main_Rx;
     return BUFREQ_OK;
 }
 
@@ -73,7 +88,18 @@ void Main_CatbRxIndication(
 )
 {
     fprintf(stderr, "rx: %u, %u\n", id, result);
+    fprintf(stdout, "\n");
     fflush(stdout);
+    if (result == E_OK) {
+        Main_Tx = 0u;
+        PduInfoType info;
+        info.SduDataPtr = Main_Buffer;
+        info.SduLength  = Main_Len;
+        (void)Catb_Transmit(0u, &info);
+    } else {
+        Main_Len = 0u;
+        Main_Tx  = 0u;
+    }
 }
 
 BufReq_ReturnType Main_CatbCopyTxData(
@@ -83,7 +109,14 @@ BufReq_ReturnType Main_CatbCopyTxData(
         PduLengthType*          available
     )
 {
-    return BUFREQ_E_NOT_OK;
+    if (info->SduLength <= Main_Len - Main_Tx) {
+        memcpy(info->SduDataPtr, &Main_Buffer[Main_Tx], info->SduLength);
+        Main_Tx += info->SduLength;
+        *available = Main_Len - Main_Tx;
+        return BUFREQ_OK;
+    } else {
+        return BUFREQ_E_NOT_OK;
+    }
 }
 
 void Main_CatbTxConfirmation(

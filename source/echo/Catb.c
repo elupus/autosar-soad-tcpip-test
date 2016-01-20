@@ -48,7 +48,7 @@ static uint8 Catb_Nibble_Encode(uint8 src)
     if(src <= 0x9) {
         return (uint8)'0' + src;
     } else {
-        return (uint8)'a' + src;
+        return (uint8)'a' - 0xau + src;
     }
 }
 
@@ -192,12 +192,12 @@ Std_ReturnType Catb_Transmit(
         const PduInfoType*      info
     )
 {
-    BufReq_ReturnType  res;
+    Std_ReturnType     res;
     PduInfoType        info2;
     Catb_TxStatusType* status = &Catb_TxStatus[id];
     info2.SduDataPtr = NULL_PTR;
     info2.SduLength  = info->SduLength * 2u + sizeof(Catb_Suffix);
-    res = CATB_LO_TRANSMIT(id, info2);
+    res = CATB_LO_TRANSMIT(id, &info2);
     if (res == E_OK) {
         status->remain = info2.SduLength;
     } else {
@@ -217,19 +217,22 @@ BufReq_ReturnType Catb_CopyTxData(
     PduInfoType        info2;
     Catb_TxStatusType* status = &Catb_TxStatus[id];
 
-    if (info->SduLength & 0x1u) {
-        return BUFREQ_E_NOT_OK;
-    }
-
     if (status->remain > sizeof(Catb_Suffix)) {
         PduLengthType      rem;
         BufReq_ReturnType  res;
 
-        if (status->remain - sizeof(Catb_Suffix) > info->SduLength) {
-            info2.SduLength = info->SduLength / 2u;
-        } else {
-            info2.SduLength = status->remain - sizeof(Catb_Suffix);
+        info2.SduLength = status->remain - sizeof(Catb_Suffix);
+        if (info2.SduLength > info->SduLength) {
+            info2.SduLength = info->SduLength;
         }
+
+        if (info2.SduLength & 0x1u) {
+            return BUFREQ_E_NOT_OK;
+        }
+
+        info2.SduLength /= 2u;
+
+        /* we can reuse target buffer here, since we only need half the size */
         info2.SduDataPtr = &info->SduDataPtr[info2.SduLength];
 
         res = CATB_UP_COPYTXDATA(id, &info2, retry, &rem);
@@ -248,11 +251,12 @@ BufReq_ReturnType Catb_CopyTxData(
 
     if (status->remain <= sizeof(Catb_Suffix)) {
         while (trg < info->SduLength) {
+            status->remain--;
             info->SduDataPtr[trg] = Catb_Suffix[status->remain];
             trg++;
-            status->remain--;
         }
     }
+    *available = status->remain;
 
     return E_OK;
 }
